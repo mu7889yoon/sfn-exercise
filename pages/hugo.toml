@@ -1,6 +1,9 @@
 baseURL = 'https://example.org/'
 languageCode = 'ja-jp'
-title = 'Step Functions Exercise'
+title = '''
+Step Functions
+Exercise
+'''
 theme = 'hugo-theme-relearn'
 
 [module]
