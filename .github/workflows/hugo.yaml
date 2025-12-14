@@ -27,8 +27,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          submodules: recursive
-          fetch-depth: 0
+          sparse-checkout: |
+            pages
+          submodules: true
+          fetch-depth: 1
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
