@@ -1,0 +1,16 @@
+baseURL = 'https://example.org/'
+languageCode = 'ja-jp'
+title = 'Step Functions Exercise'
+theme = 'hugo-theme-relearn'
+
+[module]
+  [[module.imports]]
+    path = 'hugo-theme-relearn'
+
+[menu]
+    [[menu.main]]
+        identifier = 'home'
+        name = 'Home'
+        url = '/'
+        weight = 1
+
