@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS or Amazon? 〇×クイズ</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --accent: #2c7be5;
+      --accent-2: #ff7a59;
+      --text: #1f2933;
+      --muted: #52606d;
+      --correct: #16a34a;
+      --wrong: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #ecf3ff, #f5f7fb 40%),
+                  radial-gradient(circle at 80% 0%, #ffe8df, #f5f7fb 38%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(31, 41, 51, 0.12);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    header {
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #2c7be5, #5ec0ff);
+      color: #fff;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: 0.4px;
+    }
+
+    header p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+    }
+
+    main {
+      padding: 24px 28px 32px;
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #eef2ff;
+      color: #364152;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill strong { letter-spacing: 0.2px; }
+
+    .question {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .question h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    .question p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 14px 0 6px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-aws {
+      background: #2c7be5;
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(44, 123, 229, 0.24);
+    }
+
+    .btn-amazon {
+      background: #ff7a59;
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(255, 122, 89, 0.22);
+    }
+
+    .result {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .result.correct { color: var(--correct); }
+    .result.wrong { color: var(--wrong); }
+
+    .summary {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px dashed #d5dae1;
+      background: #f9fafb;
+      color: #364152;
+      font-size: 14px;
+    }
+
+    .score {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .footnote {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 640px) {
+      header, main { padding: 18px 16px; }
+      .question { padding: 16px; }
+      .actions { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>AWS or Amazon? 〇×クイズ</h1>
+      <p>〇 = AWSに関する内容 / × = Amazon（小売・コンテンツ等）に関する内容</p>
+    </header>
+    <main>
+      <div class="status">
+        <div class="pill"><strong>Q</strong><span id="progress">1 / 1</span></div>
+        <div class="pill"><strong>Score</strong><span id="score">0</span></div>
+      </div>
+
+      <div id="question-container"></div>
+
+      <div class="summary" id="summary" hidden>
+        <p class="score" id="score-line"></p>
+        <p id="comment"></p>
+        <p class="footnote">「もう一度」ボタンで問題をシャッフルして再挑戦できます。</p>
+        <button class="btn-aws" id="restart">もう一度</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "Amazon EC2は仮想サーバーを提供するサービスだ。",
+        answer: "aws",
+        fact: "Elastic Compute Cloud (EC2) はAWSのコンピュートサービス。"
+      },
+      {
+        text: "Kindle Unlimitedは定額で本を読めるサービスだ。",
+        answer: "amazon",
+        fact: "KindleはAmazonのコンテンツ・デバイス事業。"
+      },
+      {
+        text: "Amazon S3はオブジェクトストレージサービスだ。",
+        answer: "aws",
+        fact: "Simple Storage Service (S3) はAWSの代表的なストレージサービス。"
+      },
+      {
+        text: "Prime Videoで映画やドラマを配信している。",
+        answer: "amazon",
+        fact: "Prime VideoはAmazonのサブスクリプションサービス。"
+      },
+      {
+        text: "IAMロールを使ってアクセス権限を委任できる。",
+        answer: "aws",
+        fact: "Identity and Access Management (IAM) はAWSの認可/認証サービス。"
+      },
+      {
+        text: "Amazonフレッシュで生鮮食品を届けてもらえる。",
+        answer: "amazon",
+        fact: "AmazonフレッシュはAmazonの食料品配送サービス。"
+      },
+      {
+        text: "CloudWatchはメトリクス監視とログ収集を行う。",
+        answer: "aws",
+        fact: "Amazon CloudWatchはAWSの運用監視サービス。"
+      },
+      {
+        text: "AWS Fargateはコンテナ実行のためのサーバーレス基盤だ。",
+        answer: "aws",
+        fact: "FargateはECS/EKS向けのサーバーレスコンテナ実行環境。"
+      },
+      {
+        text: "Fire TV Stickはテレビで動画を楽しむためのデバイスだ。",
+        answer: "amazon",
+        fact: "Fire TVデバイスはAmazonのハードウェア製品。"
+      },
+      {
+        text: "Route 53はマネージドDNSサービスだ。",
+        answer: "aws",
+        fact: "Amazon Route 53はドメイン管理とDNSルーティングを提供。"
+      }
+    ];
+
+    const container = document.getElementById("question-container");
+    const progressEl = document.getElementById("progress");
+    const scoreEl = document.getElementById("score");
+    const summaryEl = document.getElementById("summary");
+    const scoreLine = document.getElementById("score-line");
+    const comment = document.getElementById("comment");
+    const restartBtn = document.getElementById("restart");
+
+    let currentIndex = 0;
+    let score = 0;
+    let shuffled = [];
+
+    function shuffle(list) {
+      return [...list].sort(() => Math.random() - 0.5);
+    }
+
+    function renderQuestion() {
+      const q = shuffled[currentIndex];
+      progressEl.textContent = `${currentIndex + 1} / ${shuffled.length}`;
+      scoreEl.textContent = score;
+
+      container.innerHTML = `
+        <div class="question">
+          <h3>${q.text}</h3>
+          <p>〇 = AWS / × = Amazon</p>
+          <div class="actions">
+            <button class="btn-aws" data-choice="aws">〇 AWS</button>
+            <button class="btn-amazon" data-choice="amazon">× Amazon</button>
+          </div>
+          <div class="result" id="result"></div>
+        </div>
+      `;
+
+      container.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", (e) => handleAnswer(e.target.dataset.choice));
+      });
+    }
+
+    function handleAnswer(choice) {
+      const q = shuffled[currentIndex];
+      const resultEl = document.getElementById("result");
+      const correct = choice === q.answer;
+
+      if (correct) {
+        resultEl.textContent = `正解！ ${q.fact}`;
+        resultEl.className = "result correct";
+        score += 1;
+      } else {
+        resultEl.textContent = `不正解… ${q.fact}`;
+        resultEl.className = "result wrong";
+      }
+
+      scoreEl.textContent = score;
+
+      setTimeout(() => {
+        currentIndex += 1;
+        if (currentIndex < shuffled.length) {
+          renderQuestion();
+        } else {
+          showSummary();
+        }
+      }, 900);
+    }
+
+    function showSummary() {
+      container.innerHTML = "";
+      summaryEl.hidden = false;
+      scoreLine.textContent = `${score} / ${shuffled.length} 点`;
+      comment.textContent = score === shuffled.length
+        ? "パーフェクト！AWSとAmazonを完璧に見分けられています。"
+        : score >= Math.floor(shuffled.length * 0.7)
+          ? "いい感じ！もう一度挑戦して満点を目指しましょう。"
+          : "まだ伸びしろあり。サービスの特徴をおさらいしてみてください。";
+    }
+
+    function start() {
+      shuffled = shuffle(questions);
+      currentIndex = 0;
+      score = 0;
+      summaryEl.hidden = true;
+      renderQuestion();
+    }
+
+    restartBtn.addEventListener("click", start);
+    start();
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS or Amazon? Quiz</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">AWS or Amazon?</p>
+          <h1>〇×クイズでサービス名チェック</h1>
+          <p class="sub">
+            AWSサービスの正式名称が「AWS」か「Amazon」どちらで始まるかを当てる10問セットです。回答するとすぐに正誤と補足を確認できます。
+          </p>
+          <nav class="tabs" aria-label="ビュー切り替え">
+            <button class="tab active" data-view-switch="play">クイズに挑戦</button>
+            <button class="tab" data-view-switch="manage">問題管理</button>
+          </nav>
+        </div>
+        <div class="pill">
+          <span>クイズID</span>
+          <strong id="quiz-id">-</strong>
+        </div>
+      </header>
+
+      <section class="view" id="view-play">
+        <main class="layout">
+          <section class="card">
+          <div class="status">
+            <span id="progress">0 / 0</span>
+            <span id="score">得点: 0</span>
+          </div>
+          <form id="quiz-options" class="quiz-options">
+            <label class="inline">
+              <input type="radio" name="count" value="10" checked />
+              10問
+            </label>
+            <label class="inline">
+              <input type="radio" name="count" value="20" />
+              20問
+            </label>
+            <label class="inline">
+              <input type="radio" name="count" value="custom" />
+              カスタム
+            </label>
+            <input id="count-custom" type="number" name="count-custom" min="1" max="20" value="10" disabled />
+            <button type="submit" class="ghost small">問題数を確定</button>
+          </form>
+          <div id="question-meta"></div>
+          <h2 id="question-text">読み込み中...</h2>
+          <div class="choices">
+            <button class="choice aws" data-choice="aws">AWS</button>
+            <button class="choice amazon" data-choice="amazon">Amazon</button>
+            </div>
+            <div id="feedback" class="feedback hidden"></div>
+            <div class="actions">
+              <button id="next-btn" class="ghost" disabled>次の問題へ</button>
+              <button id="restart-btn" class="link">別のセットで再挑戦</button>
+            </div>
+          </section>
+
+          <section class="card hidden" id="summary">
+            <h3>結果</h3>
+            <p id="summary-text"></p>
+            <ul id="summary-list"></ul>
+          </section>
+
+          <section class="card" id="history-card">
+            <div class="history-header">
+              <h3>ローカル履歴</h3>
+              <button id="clear-history" class="link small">クリア</button>
+            </div>
+            <div id="history"></div>
+          </section>
+        </main>
+      </section>
+
+      <section class="view hidden" id="view-manage">
+        <div class="layout manage-layout">
+          <section class="card">
+            <div class="list-header">
+              <div>
+                <h3>問題一覧</h3>
+                <p class="muted">登録済みのクイズを確認し、編集・削除できます。</p>
+              </div>
+              <button id="refresh-questions" class="ghost">再読み込み</button>
+            </div>
+            <div id="question-list-status" class="muted"></div>
+            <div id="question-list" class="question-list"></div>
+          </section>
+
+          <div class="form-stack">
+            <section class="card form-card" id="create-question-card">
+              <h3>新しい問題を追加</h3>
+              <form id="create-question-form">
+                <label>
+                  <span>ID (slug)</span>
+                  <input name="id" required />
+                </label>
+                <label>
+                  <span>名前空間 (namespace)</span>
+                  <input name="namespace" placeholder="例: analytics" />
+                </label>
+            <label>
+              <span>問題文</span>
+              <textarea name="text" rows="3" required></textarea>
+            </label>
+            <fieldset>
+              <legend>正解</legend>
+              <label class="inline"><input type="radio" name="answer" value="aws" required /> AWS</label>
+              <label class="inline"><input type="radio" name="answer" value="amazon" /> Amazon</label>
+            </fieldset>
+            <div class="actions">
+              <button type="submit" class="ghost">作成</button>
+              <span id="create-status" class="muted"></span>
+            </div>
+          </form>
+            </section>
+
+            <section class="card form-card" id="edit-question-card">
+              <div class="list-header">
+                <h3 id="edit-title">選択中: なし</h3>
+                <button id="clear-edit" class="link small" type="button">リセット</button>
+              </div>
+              <p class="muted">一覧から編集したい問題を選ぶと内容がここに入ります。</p>
+              <form id="edit-question-form">
+                <label>
+                  <span>ID (slug)</span>
+                  <input name="id" required />
+                </label>
+                <label>
+                  <span>名前空間 (namespace)</span>
+                  <input name="namespace" placeholder="例: analytics" />
+                </label>
+            <label>
+              <span>問題文</span>
+              <textarea name="text" rows="3" required></textarea>
+            </label>
+            <fieldset>
+              <legend>正解</legend>
+              <label class="inline"><input type="radio" name="answer" value="aws" required /> AWS</label>
+              <label class="inline"><input type="radio" name="answer" value="amazon" /> Amazon</label>
+            </fieldset>
+            <div class="actions">
+              <button type="submit" class="ghost">保存</button>
+              <span id="edit-status" class="muted"></span>
+            </div>
+          </form>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script src="./state.js"></script>
+    <script src="./api.js"></script>
+    <script src="./quiz.js"></script>
+    <script src="./admin.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
